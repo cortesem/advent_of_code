@@ -2,8 +2,8 @@ use std::collections::HashMap;
 
 struct Card {
     card_id: u32,
-    winning_numbers: Vec<u32>,
-    numbers: Vec<u32>,
+    // winning_numbers: Vec<u32>,
+    // numbers: Vec<u32>,
     matches: u32,
 }
 
@@ -49,8 +49,8 @@ impl Card {
 
         Self {
             card_id: id,
-            winning_numbers,
-            numbers,
+            // winning_numbers,
+            // numbers,
             matches,
         }
     }
@@ -71,13 +71,27 @@ pub fn solve_q4_p1(s: &str) -> u32 {
     cards.iter().map(|c| c.get_points()).sum()
 }
 
-// pub fn solve_q4_p2(s: &str) -> u32 {
-//     let cards: Vec<Card> = s.split('\n').map(|l| Card::new(l)).collect();
-//     let mut total_cards: u32 = 0;
-//     // lookup table
-//     let mut card_winnings = HashMap::<u32, u32>::new();
-//     for c in cards.iter_mut() {}
-// }
+pub fn solve_q4_p2(s: &str) -> u32 {
+    let cards: Vec<Card> = s.split('\n').map(|l| Card::new(l)).collect();
+    // lookup table
+    let mut cards_map = HashMap::<u32, u32>::new();
+    cards.iter().map(|c| count_cards(c.card_id, &cards, &mut cards_map)).sum()
+}
+
+fn count_cards(card_id: u32, cards: &Vec<Card>, cards_map: &mut HashMap<u32, u32>) -> u32 {
+    // check map for card count at this id and return if exists
+    if cards_map.contains_key(&card_id) {
+        return *cards_map.get(&card_id).unwrap();
+    }
+    // calculate this cards count and add it to the map
+    let mut card_count: u32 = 1;
+    let matches: u32 = cards[card_id as usize - 1].matches;
+    for i in 1..=matches {
+        card_count += count_cards(card_id + i, cards, cards_map);
+    }
+    cards_map.insert(card_id, card_count);
+    card_count
+}
 
 #[cfg(test)]
 mod tests {
@@ -130,5 +144,11 @@ mod tests {
     fn test_solve_q4p1() {
         let d4p1_test = include_str!("./input1_test.txt");
         assert_eq!(solve_q4_p1(d4p1_test), 13);
+    }
+
+    #[test]
+    fn test_solve_q4p2() {
+        let d4p2_test = include_str!("./input1_test.txt");
+        assert_eq!(solve_q4_p2(d4p2_test), 30);
     }
 }

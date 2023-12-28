@@ -2,7 +2,7 @@ use crate::{
     day_01::day1::{solve_q1_p1, solve_q1_p2},
     day_02::day2::{solve_q2_p1, solve_q2_p2},
     day_03::day3::{solve_q3_p1, solve_q3_p2},
-    day_04::day4::solve_q4_p1,
+    day_04::day4::{solve_q4_p1, solve_q4_p2},
 };
 
 mod day_01;
@@ -38,5 +38,9 @@ fn main() {
     println!(
         "Day4 Part1: {}",
         solve_q4_p1(include_str!("./day_04/input.txt"))
+    );
+    println!(
+        "Day4 Part2: {}",
+        solve_q4_p2(include_str!("./day_04/input.txt"))
     );
 }
