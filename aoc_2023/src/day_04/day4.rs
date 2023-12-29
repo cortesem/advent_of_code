@@ -75,7 +75,10 @@ pub fn solve_q4_p2(s: &str) -> u32 {
     let cards: Vec<Card> = s.split('\n').map(|l| Card::new(l)).collect();
     // lookup table
     let mut cards_map = HashMap::<u32, u32>::new();
-    cards.iter().map(|c| count_cards(c.card_id, &cards, &mut cards_map)).sum()
+    cards
+        .iter()
+        .map(|c| count_cards(c.card_id, &cards, &mut cards_map))
+        .sum()
 }
 
 fn count_cards(card_id: u32, cards: &Vec<Card>, cards_map: &mut HashMap<u32, u32>) -> u32 {
