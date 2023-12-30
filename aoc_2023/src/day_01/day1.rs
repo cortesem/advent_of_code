@@ -5,9 +5,8 @@ pub fn solve_q1_p1(s: &str) -> u32 {
 
 pub fn solve_q1_p2(s: &str) -> u32 {
     // expected input is the entire input file as an &str
-    s.split('\n')
-        .map(|l| calibration_value(&replace_words(l)))
-        .sum()
+    let s = &replace_words(s);
+    s.split('\n').map(|l| calibration_value(l)).sum()
 }
 
 fn replace_words(s: &str) -> String {
@@ -27,7 +26,7 @@ fn replace_words(s: &str) -> String {
     let mut result: String = String::from(s);
 
     for word in words {
-        result = result.replace(word.0, word.1)
+        result = result.replace(word.0, word.1);
     }
 
     result
