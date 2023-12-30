@@ -1,13 +1,12 @@
 struct Race {
     // time: u64,
     // distance_record: u64,
-    winning_holds: Vec<u64>,
+    winning_holds: (u64, u64),
 }
 
 impl Race {
     fn new(time: u64, distance_record: u64) -> Self {
-        let (r1, r2) = Race::get_roots(1.0, -(time as f64), distance_record as f64);
-        let winning_holds: Vec<u64> = (r1..=r2).collect();
+        let winning_holds = Race::get_roots(1.0, -(time as f64), distance_record as f64);
 
         Self {
             // time,
@@ -17,12 +16,12 @@ impl Race {
     }
 
     fn get_number_of_winnng_holds(&self) -> u64 {
-        self.winning_holds.len() as u64
+        self.winning_holds.1 - self.winning_holds.0 + 1
     }
 
     fn get_roots(a: f64, b: f64, c: f64) -> (u64, u64) {
         // no error checking here :) maybe it'll work!
-        let dividend = ((b).powf(2.0) - (4.0 * a * c)).sqrt();
+        let dividend = (b.powi(2) - (4.0 * a * c)).sqrt();
         let divisor = 2.0 * a;
         let x1 = (-b + dividend) / divisor;
         let x2 = (-b - dividend) / divisor;
