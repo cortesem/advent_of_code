@@ -94,4 +94,11 @@ mod tests {
         let d6p2_test = include_str!("./input1_test.txt");
         assert_eq!(solve_q6_p2(d6p2_test), 71503);
     }
+
+    #[test]
+    fn test_answers() {
+        let input = include_str!("./input.txt");
+        assert_eq!(solve_q6_p1(input), 1731600);
+        assert_eq!(solve_q6_p2(input), 40087680);
+    }
 }

@@ -218,4 +218,11 @@ mod tests {
         let d3p2_test = include_str!("./input1_test.txt");
         assert_eq!(solve_q3_p2(d3p2_test), 467835);
     }
+
+    #[test]
+    fn test_answers() {
+        let input = include_str!("./input.txt");
+        assert_eq!(solve_q3_p1(input), 546312);
+        assert_eq!(solve_q3_p2(input), 87449461);
+    }
 }

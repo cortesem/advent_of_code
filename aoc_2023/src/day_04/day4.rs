@@ -154,4 +154,11 @@ mod tests {
         let d4p2_test = include_str!("./input1_test.txt");
         assert_eq!(solve_q4_p2(d4p2_test), 30);
     }
+
+    #[test]
+    fn test_answers() {
+        let input = include_str!("./input.txt");
+        assert_eq!(solve_q4_p1(input), 21088);
+        assert_eq!(solve_q4_p2(input), 6874754);
+    }
 }
