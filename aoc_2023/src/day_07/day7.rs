@@ -1,8 +1,22 @@
-#[derive(Clone, Debug)]
+use std::cmp::Ordering;
+
+#[derive(Clone, Debug, Eq, PartialEq)]
 struct Hand {
     cards: Vec<u32>,
     bid: u64,
     hand_type: u32,
+}
+
+impl Ord for Hand {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.compare(other, 0)
+    }
+}
+
+impl PartialOrd for Hand {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.compare(other, 0))
+    }
 }
 
 impl Hand {
@@ -36,7 +50,6 @@ impl Hand {
                     _ => 0,
                 }
             })
-            .rev() // reverse this vec for sorting later
             .collect();
 
         // add cards to the lookup table
@@ -77,6 +90,21 @@ impl Hand {
             hand_type,
         }
     }
+
+    fn compare(&self, other: &Self, index: usize) -> Ordering {
+        if index == self.cards.len() {
+            return Ordering::Equal;
+        }
+
+        if self.cards[index] > other.cards[index] {
+            return Ordering::Greater;
+        }
+        if self.cards[index] < other.cards[index] {
+            return Ordering::Less;
+        }
+
+        self.compare(other, index + 1)
+    }
 }
 
 struct Game {
@@ -93,12 +121,8 @@ impl Game {
             hands[hand.hand_type as usize - 1].push(hand);
         }
 
-        // kind of gross but simple.
-        // Sort each types vec (sort the hands with eachother) from last to first card, which gives us the correct ordering.
         for v in hands.iter_mut() {
-            for i in 0..5 {
-                v.sort_by(|a, b| a.cards[i as usize].cmp(&b.cards[i as usize]));
-            }
+            v.sort();
         }
 
         Self { hands }
@@ -144,5 +168,12 @@ mod tests {
     fn test_solve_q7p2() {
         let d7p2_test = include_str!("./input1_test.txt");
         assert_eq!(solve_q7_p2(d7p2_test), 5905);
+    }
+
+    #[test]
+    fn test_answers() {
+        let input = include_str!("./input.txt");
+        assert_eq!(solve_q7_p1(input), 251216224);
+        assert_eq!(solve_q7_p2(input), 250825971);
     }
 }
