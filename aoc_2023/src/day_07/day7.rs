@@ -8,11 +8,12 @@ struct Hand {
 impl Hand {
     fn new(s: &str, joker: bool) -> Self {
         let mut kind: Vec<u32> = vec![0; 15];
-        let mut jokers = 0;
+        let mut jokers = 0; // this is all so gross
 
         let (hand, bid) = s.split_once(' ').unwrap();
         let bid = bid.parse::<u64>().unwrap();
 
+        // Convert string to u32 values
         let cards: Vec<u32> = hand
             .chars()
             .map(|c| {
@@ -35,25 +36,30 @@ impl Hand {
                     _ => 0,
                 }
             })
-            .rev()
+            .rev() // reverse this vec for sorting later
             .collect();
 
+        // add cards to the lookup table
         for c in &cards {
             kind[*c as usize] += 1;
         }
 
+        // We don't want to consider jokers yet.
         if joker {
             kind[1] = 0;
         }
 
+        // sort lookup table. We only need to check the first two indecies to know what kind of hand we have.
         kind.sort_by(|a, b| b.cmp(a));
 
+        // Jokers will always pad the largest number of duplicate cards.
         if joker {
             kind[0] += jokers;
         }
 
         let mut it = kind.iter();
 
+        // Classify the type of hand so we can sort them later. adding jokers made this gross to read :)
         let hand_type = match (it.next().unwrap(), it.next().unwrap()) {
             (1, _) => 1,
             (2, 2) => 3,
@@ -79,6 +85,7 @@ struct Game {
 
 impl Game {
     fn new(s: &str, joker: bool) -> Self {
+        // each type of hand gets its own vec
         let mut hands: Vec<Vec<Hand>> = vec![vec![]; 7];
 
         for line in s.split('\n') {
@@ -86,6 +93,8 @@ impl Game {
             hands[hand.hand_type as usize - 1].push(hand);
         }
 
+        // kind of gross but simple.
+        // Sort each types vec (sort the hands with eachother) from last to first card, which gives us the correct ordering.
         for v in hands.iter_mut() {
             for i in 0..5 {
                 v.sort_by(|a, b| a.cards[i as usize].cmp(&b.cards[i as usize]));
