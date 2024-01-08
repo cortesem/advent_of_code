@@ -37,7 +37,6 @@ impl Network {
         let mut next = self.network.get(node).unwrap();
         while !node.ends_with(to) {
             for instruction in self.instructions.chars() {
-                steps += 1;
                 if instruction == 'L' {
                     node = &next.0;
                 } else {
@@ -45,6 +44,7 @@ impl Network {
                 }
                 next = self.network.get(node).unwrap();
             }
+            steps += self.instructions.len() as u64;
         }
         steps
     }
