@@ -11,6 +11,7 @@ use crate::{
     day_08::day8::{solve_q8_p1, solve_q8_p2},
     day_09::day9::{solve_q9_p1, solve_q9_p2},
     day_10::day10::{solve_q10_p1, solve_q10_p2},
+    day_11::day11::{solve_q11_p1, solve_q11_p2},
 };
 
 mod day_01;
@@ -23,6 +24,7 @@ mod day_07;
 mod day_08;
 mod day_09;
 mod day_10;
+mod day_11;
 
 fn main() {
     let total = Instant::now();
@@ -144,6 +146,18 @@ fn main() {
     println!(
         "Day10 Part2: {}\t\t{:.2?}",
         solve_q10_p2(include_str!("./day_10/input.txt")),
+        start.elapsed()
+    );
+    start = Instant::now();
+    println!(
+        "Day11 Part1: {}\t\t{:.2?}",
+        solve_q11_p1(include_str!("./day_11/input.txt")),
+        start.elapsed()
+    );
+    start = Instant::now();
+    println!(
+        "Day11 Part2: {}\t{:.2?}",
+        solve_q11_p2(include_str!("./day_11/input.txt")),
         start.elapsed()
     );
 
