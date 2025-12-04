@@ -9,8 +9,8 @@ pub fn part1(input: &str) -> u64 {
         .sum()
 }
 
-pub fn part2(_input: &str) -> u64 {
-    1
+pub fn part2(input: &str) -> u64 {
+    input.trim().split('\n').map(|bank| topk(bank, 12)).sum()
 }
 
 fn top_two(numbers: &str) -> (u64, u64) {
@@ -38,6 +38,32 @@ fn top_two(numbers: &str) -> (u64, u64) {
     }
 
     (*first, *second)
+}
+
+fn topk(numbers: &str, k: usize) -> u64 {
+    let mut numbers: Vec<(usize, u64)> = numbers
+        .chars()
+        .enumerate()
+        .map(|(i, c)| (i, c.to_digit(10).unwrap() as u64))
+        .collect();
+
+    numbers.sort_by(|a, b| b.1.cmp(&a.1));
+    // numbers.sort_by_key(|(_, num)| *num);
+    println!("{:?}", numbers);
+
+    // now take the topk and sort by index
+    let mut numbers: Vec<(usize, u64)> = numbers.into_iter().take(k).collect();
+    numbers.sort_by_key(|(index, _)| *index);
+    println!("{:?}", numbers);
+
+    let mut combined = numbers.first().unwrap().1;
+    for i in 1..numbers.len() {
+        combined *= 10;
+        combined += numbers.get(i).unwrap().1;
+    }
+    println!("{combined}");
+
+    combined
 }
 
 #[cfg(test)]
