@@ -56,17 +56,14 @@ fn count_rotations(mut dial: i32, rotation: &str) -> (i32, i32) {
     if direction == "L" {
         if dial == 0 {
             dial -= value;
-            if dial < 0 {
-                dial += 100;
-            }
         } else {
             dial -= value;
             if dial <= 0 {
                 count += 1;
-                if dial < 0 {
-                    dial += 100;
-                }
             }
+        }
+        if dial < 0 {
+            dial += 100;
         }
     } else {
         dial += value;
