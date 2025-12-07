@@ -1,10 +1,12 @@
 use crate::day_01::*;
 use crate::day_02::*;
 use crate::day_03::*;
+use crate::day_04::*;
 
 mod day_01;
 mod day_02;
 mod day_03;
+mod day_04;
 
 fn main() {
     println!(
@@ -35,5 +37,15 @@ fn main() {
     println!(
         "Day3 part2: {}",
         day3::part2(include_str!("day_03/input/input.txt"))
+    );
+
+    println!(
+        "Day4 part1: {}",
+        day4::part1(include_str!("day_04/input/input.txt"))
+    );
+
+    println!(
+        "Day4 part2: {}",
+        day4::part2(include_str!("day_04/input/input.txt"))
     );
 }
