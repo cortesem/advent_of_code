@@ -38,9 +38,8 @@ pub fn part1(input: &str) -> u64 {
                     input[current_beam + 1] = '|';
                 }
                 break;
-            } else {
-                current_beam += width;
             }
+            current_beam += width;
         }
     }
 
@@ -48,7 +47,49 @@ pub fn part1(input: &str) -> u64 {
 }
 
 pub fn part2(input: &str) -> u64 {
-    1
+    // Need to flatten the 2dness of this puzzle
+    let height = input.lines().count();
+    let input: Vec<char> = input.trim().lines().flat_map(|line| line.chars()).collect();
+    let width = input.len() / height;
+
+    // find the starting point
+    let mut start = 0;
+    for i in 0..width {
+        if *input.get(i).unwrap() == 'S' {
+            start = i;
+        }
+    }
+
+    let mut lookup = vec![None; input.len()];
+    timelines_from(start, &input, width, height, &mut lookup)
+}
+
+fn timelines_from(
+    beam_position: usize,
+    schematic: &[char],
+    width: usize,
+    height: usize,
+    lookup: &mut [Option<u64>],
+) -> u64 {
+    // check if we know how many timelines from this beam_position
+    if let Some(timelines) = lookup[beam_position] {
+        return timelines;
+    }
+
+    // if not, increment until we find the next split or return 1 if we hit the bottom.
+    let mut move_pos = beam_position;
+    while move_pos / width < height - 1 && schematic[move_pos] != '^' {
+        move_pos += width;
+    }
+
+    let mut timelines = 1;
+    if schematic[move_pos] == '^' {
+        timelines = timelines_from(move_pos + 1, schematic, width, height, lookup)
+            + timelines_from(move_pos - 1, schematic, width, height, lookup);
+    }
+
+    lookup[beam_position] = Some(timelines);
+    timelines
 }
 
 #[cfg(test)]
@@ -64,6 +105,6 @@ mod tests {
     #[test]
     fn part2_example() {
         let input = include_str!("input/test_input.txt");
-        assert_eq!(1, part2(input));
+        assert_eq!(40, part2(input));
     }
 }
