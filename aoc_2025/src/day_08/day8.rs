@@ -1,6 +1,6 @@
 use std::{cmp::Reverse, collections::HashSet};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Position(i64, i64, i64);
 
 impl Position {
@@ -11,19 +11,17 @@ impl Position {
 }
 
 #[derive(Debug)]
-struct JunctionBox {
-    pos: Position,
-    closest: Position,
-    dist: f64,
-}
+struct Connection(Position, Position, f64);
 
-impl JunctionBox {
-    fn new(pos: Position, closest: Position, dist: f64) -> Self {
-        Self { pos, closest, dist }
+impl PartialEq for Connection {
+    fn eq(&self, other: &Self) -> bool {
+        self.2 == other.2
+            && (self.0 == other.0 && self.1 == other.1 || self.0 == other.1 && self.1 == other.0)
     }
 }
 
-pub fn part1(input: &str, connections: usize) -> u64 {
+pub fn part1(input: &str, num_of_conn: usize) -> u64 {
+    // get all positions
     let mut locations: Vec<Position> = vec![];
     for location in input.lines() {
         let xyz: Vec<&str> = location.split(',').collect();
@@ -34,83 +32,91 @@ pub fn part1(input: &str, connections: usize) -> u64 {
         ));
     }
 
-    // locations.sort_by(|a, b| a.0.cmp(&b.0));
-    // locations.sort_by(|a, b| a.1.cmp(&b.1));
-    // locations.sort_by(|a, b| a.2.cmp(&b.2));
-
-    // for location in locations {
-    //     println!("{:?}", location);
-    // }
-
-    let mut junctions = vec![];
-    for (i, pos) in locations.iter().enumerate() {
-        let mut closest = if i < locations.len() - 1 {
-            &locations[i + 1]
-        } else {
-            &locations[i - 1]
-        };
-        let mut dist = pos.distance_to(closest);
-        for (j, other) in locations.iter().enumerate() {
-            if i == j {
-                continue;
-            }
-
-            let other_dist = pos.distance_to(other);
-            if other_dist < dist {
-                dist = other_dist;
-                closest = other;
-            }
-        }
-        junctions.push(JunctionBox::new(pos.clone(), closest.clone(), dist));
+    // calculate distances for each position
+    let mut positions_with_distance = Vec::<Vec<Connection>>::new();
+    for position in locations.iter() {
+        positions_with_distance.push(calc_distances(position, &locations));
     }
+    let mut positions_with_distance: Vec<Connection> =
+        positions_with_distance.into_iter().flatten().collect();
+    // this might contain duplicates when two points are both closest to eachother.
+    positions_with_distance.sort_by(|a, b| a.2.total_cmp(&b.2));
+    positions_with_distance.dedup();
 
-    junctions.sort_by(|a, b| a.dist.total_cmp(&b.dist));
+    // create the connections
+    let mut connections = get_n_closest_connections(&positions_with_distance, num_of_conn);
+    connections.sort_by_key(|a| Reverse(a.len()));
 
-    calc_circuits(&junctions, connections)
+    connections
+        .iter()
+        .take(3)
+        .map(|c| c.len())
+        .product::<usize>() as u64
 }
 
 pub fn part2(input: &str) -> u64 {
     1
 }
 
-fn calc_circuits(junctions: &[JunctionBox], connections: usize) -> u64 {
-    let mut circuits = Vec::<HashSet<(i64, i64, i64)>>::new();
-    let mut initial_circuit = HashSet::<(i64, i64, i64)>::new();
-    initial_circuit.insert((junctions[0].pos.0, junctions[0].pos.1, junctions[0].pos.2));
-    initial_circuit.insert((
-        junctions[0].closest.0,
-        junctions[0].closest.1,
-        junctions[0].closest.2,
-    ));
-    circuits.push(initial_circuit);
-    // god this sucks
-    for junction in junctions.iter().take(connections).skip(1) {
-        let t1 = (junction.pos.0, junction.pos.1, junction.pos.2);
-        let t2 = (junction.closest.0, junction.closest.1, junction.closest.2);
-        let mut found = false;
+// calculate distances between a position and every other position. Returns a list of distances to
+// the other positions, sorted ascending order.
+fn calc_distances(box_position: &Position, other_boxes: &[Position]) -> Vec<Connection> {
+    let mut result = Vec::<Connection>::with_capacity(other_boxes.len());
 
-        for c in circuits.iter_mut() {
-            if c.contains(&t1) || c.contains(&t2) {
+    for other_position in other_boxes {
+        result.push(Connection(
+            box_position.clone(),
+            other_position.clone(),
+            box_position.distance_to(other_position),
+        ));
+    }
+
+    // sort and remove the first element since it will be a 0 ie. the distance to itself
+    result.sort_by(|a, b| a.2.total_cmp(&b.2));
+    result.remove(0);
+
+    result
+}
+
+fn get_n_closest_connections(
+    connections: &[Connection],
+    num_of_conn: usize,
+) -> Vec<HashSet<Position>> {
+    let mut result = Vec::<HashSet<Position>>::new();
+
+    for connection in connections.iter().take(num_of_conn) {
+        let mut found = false;
+        for circuit in result.iter_mut() {
+            if circuit.contains(&connection.0) || circuit.contains(&connection.1) {
                 found = true;
-                c.insert(t1);
-                c.insert(t2);
+                circuit.insert(connection.0.clone());
+                circuit.insert(connection.1.clone());
                 break;
             }
         }
 
         if !found {
-            let mut circuit = HashSet::<(i64, i64, i64)>::new();
-            circuit.insert(t1);
-            circuit.insert(t2);
-            circuits.push(circuit);
+            let mut circuit = HashSet::new();
+            circuit.insert(connection.0.clone());
+            circuit.insert(connection.1.clone());
+            result.push(circuit);
+        } else {
+            // check for any circuits that have an intersection
+            for i in 0..result.len() - 1 {
+                for j in (i + 1)..result.len() {
+                    if !result.get(i).unwrap().is_disjoint(result.get(j).unwrap()) {
+                        let b = result.remove(j);
+                        let mut a = result.remove(i);
+                        a.extend(b);
+                        result.push(a);
+                        break;
+                    }
+                }
+            }
         }
     }
 
-    circuits.sort_by_key(|a| Reverse(a.len()));
-
-    println!("{:?}", circuits);
-
-    (circuits[0].len() * circuits[1].len() * circuits[2].len()) as u64
+    result
 }
 
 #[cfg(test)]
