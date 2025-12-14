@@ -4,14 +4,13 @@ use std::{cmp::Reverse, collections::HashSet};
 struct Position(i64, i64, i64);
 
 impl Position {
-    fn distance_to(&self, other: &Position) -> f64 {
-        (((other.0 - self.0).pow(2) + (other.1 - self.1).pow(2) + (other.2 - self.2).pow(2)) as f64)
-            .sqrt()
+    fn distance_to(&self, other: &Position) -> u64 {
+        ((other.0 - self.0).pow(2) + (other.1 - self.1).pow(2) + (other.2 - self.2).pow(2)) as u64
     }
 }
 
 #[derive(Debug)]
-struct Connection(Position, Position, f64);
+struct Connection(Position, Position, u64);
 
 impl PartialEq for Connection {
     fn eq(&self, other: &Self) -> bool {
@@ -40,7 +39,7 @@ pub fn part1(input: &str, num_of_conn: usize) -> u64 {
     let mut positions_with_distance: Vec<Connection> =
         positions_with_distance.into_iter().flatten().collect();
     // this might contain duplicates when two points are both closest to eachother.
-    positions_with_distance.sort_by(|a, b| a.2.total_cmp(&b.2));
+    positions_with_distance.sort_by(|a, b| a.2.cmp(&b.2));
     positions_with_distance.dedup();
 
     // create the connections
@@ -74,7 +73,7 @@ pub fn part2(input: &str) -> u64 {
     let mut positions_with_distance: Vec<Connection> =
         positions_with_distance.into_iter().flatten().collect();
     // this might contain duplicates when two points are both closest to eachother.
-    positions_with_distance.sort_by(|a, b| a.2.total_cmp(&b.2));
+    positions_with_distance.sort_by(|a, b| a.2.cmp(&b.2));
     positions_with_distance.dedup();
 
     create_full_circuit(&positions_with_distance, locations.len())
@@ -94,7 +93,7 @@ fn calc_distances(box_position: &Position, other_boxes: &[Position]) -> Vec<Conn
     }
 
     // sort and remove the first element since it will be a 0 ie. the distance to itself
-    result.sort_by(|a, b| a.2.total_cmp(&b.2));
+    result.sort_by(|a, b| a.2.cmp(&b.2));
     result.remove(0);
 
     result
